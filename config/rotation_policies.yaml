@@ -1,0 +1,147 @@
+# Rotation Policies Configuration
+rotation:
+  # Automatically rotate on detection
+  auto_rotate_on_detect: true
+  
+  # Scan entire commit history
+  scan_history: true
+  scan_depth: 1000  # Max commits to scan in history
+  
+  # Grace period before rotation (seconds)
+  grace_period: 300
+  
+  # Rotation strategies
+  strategies:
+    immediate: 0  # Rotate immediately
+    scheduled: 3600  # Rotate after 1 hour
+    manual: -1  # Require manual approval
+
+# Severity mappings
+severity:
+  aws:
+    access_key: critical
+    secret_key: critical
+  azure:
+    client_secret: high
+    tenant_id: medium
+  github:
+    personal_access_token: high
+    oauth_token: high
+  slack:
+    bot_token: high
+    webhook: medium
+  ssh:
+    private_key: critical
+  database:
+    connection_string: critical
+  jwt:
+    token: medium
+  generic:
+    high_entropy: medium
+    api_key: medium
+    password: high
+
+# Actions based on severity
+actions:
+  critical:
+    rotate: immediate
+    alert: true
+    create_issue: true
+    block_pr: true
+  high:
+    rotate: scheduled
+    alert: true
+    create_issue: true
+    block_pr: false
+  medium:
+    rotate: manual
+    alert: true
+    create_issue: false
+    block_pr: false
+  low:
+    rotate: manual
+    alert: false
+    create_issue: false
+    block_pr: false
+
+# Notification settings
+notifications:
+  enabled: true
+  channels:
+    - type: webhook
+      url: "${WEBHOOK_URL}"
+      events:
+        - secret_detected
+        - rotation_completed
+        - rotation_failed
+    - type: email
+      recipients:
+        - security@example.com
+      events:
+        - critical_secret_detected
+        - rotation_failed
+    - type: slack
+      webhook: "${SLACK_WEBHOOK}"
+      channel: "#security-alerts"
+      events:
+        - all
+
+# Rotation providers configuration
+providers:
+  aws:
+    enabled: true
+    region: us-east-1
+    assume_role_arn: null
+    rotation_options:
+      create_new_key: true
+      disable_old_key: true
+      delete_old_key_after_days: 7
+      update_parameter_store: true
+  
+  azure:
+    enabled: true
+    tenant_id: "${AZURE_TENANT_ID}"
+    subscription_id: "${AZURE_SUBSCRIPTION_ID}"
+    rotation_options:
+      create_new_secret: true
+      expire_old_secret: true
+      secret_validity_days: 90
+  
+  github:
+    enabled: true
+    organization: "${GITHUB_ORG}"
+    rotation_options:
+      revoke_immediately: true
+      create_new_token: true
+      token_expiry_days: 90
+
+# Compliance and audit
+compliance:
+  audit_log: true
+  audit_file: ./audit.log
+  retention_days: 90
+  compliance_frameworks:
+    - SOC2
+    - ISO27001
+    - PCI-DSS
+  
+# Performance settings
+performance:
+  max_workers: 10
+  batch_size: 100
+  timeout_seconds: 300
+  cache_results: true
+  cache_ttl_seconds: 3600
+
+# Reporting
+reporting:
+  enabled: true
+  formats:
+    - markdown
+    - json
+    - csv
+    - html
+  output_directory: ./reports
+  include_remediation_steps: true
+  include_code_snippets: true
+  max_snippet_lines: 5

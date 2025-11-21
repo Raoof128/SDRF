@@ -1,0 +1,145 @@
+apiVersion: v1
+kind: ServiceMonitor
+metadata:
+  name: secret-framework-metrics
+  namespace: secret-framework
+  labels:
+    app: secret-framework
+spec:
+  selector:
+    matchLabels:
+      app: secret-framework
+  endpoints:
+  - port: metrics
+    interval: 30s
+    path: /metrics
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: prometheus-config
+  namespace: secret-framework
+data:
+  prometheus.yml: |
+    global:
+      scrape_interval: 30s
+      evaluation_interval: 30s
+    
+    scrape_configs:
+      - job_name: 'secret-framework'
+        static_configs:
+          - targets: ['secret-framework-api:8000']
+        metrics_path: '/metrics'
+      
+      - job_name: 'kubernetes-pods'
+        kubernetes_sd_configs:
+          - role: pod
+            namespaces:
+              names:
+                - secret-framework
+        relabel_configs:
+          - source_labels: [__meta_kubernetes_pod_label_app]
+            regex: secret-framework
+            action: keep
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: grafana-dashboards
+  namespace: secret-framework
+data:
+  secret-framework-dashboard.json: |
+    {
+      "dashboard": {
+        "title": "Secret Detection & Rotation Framework",
+        "panels": [
+          {
+            "title": "Secrets Detected (24h)",
+            "type": "stat",
+            "targets": [
+              {
+                "expr": "sum(increase(secrets_detected_total[24h]))"
+              }
+            ]
+          },
+          {
+            "title": "Rotation Success Rate",
+            "type": "gauge",
+            "targets": [
+              {
+                "expr": "sum(rate(rotations_success_total[5m])) / sum(rate(rotations_total[5m])) * 100"
+              }
+            ]
+          },
+          {
+            "title": "API Response Time",
+            "type": "graph",
+            "targets": [
+              {
+                "expr": "histogram_quantile(0.95, rate(http_request_duration_seconds_bucket[5m]))"
+              }
+            ]
+          },
+          {
+            "title": "Scan Duration",
+            "type": "graph",
+            "targets": [
+              {
+                "expr": "rate(scan_duration_seconds_sum[5m]) / rate(scan_duration_seconds_count[5m])"
+              }
+            ]
+          }
+        ]
+      }
+    }
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: alerting-rules
+  namespace: secret-framework
+data:
+  alerts.yml: |
+    groups:
+      - name: secret_framework_alerts
+        interval: 30s
+        rules:
+          - alert: HighCriticalSecretsDetected
+            expr: sum(increase(secrets_detected_total{severity="critical"}[5m])) > 5
+            for: 1m
+            labels:
+              severity: critical
+            annotations:
+              summary: "High number of critical secrets detected"
+              description: "{{ $value }} critical secrets detected in the last 5 minutes"
+          
+          - alert: RotationFailureRate
+            expr: sum(rate(rotations_failed_total[5m])) / sum(rate(rotations_total[5m])) > 0.1
+            for: 5m
+            labels:
+              severity: warning
+            annotations:
+              summary: "High rotation failure rate"
+              description: "{{ $value | humanizePercentage }} of rotations are failing"
+          
+          - alert: APIHighErrorRate
+            expr: sum(rate(http_requests_total{status=~"5.."}[5m])) / sum(rate(http_requests_total[5m])) > 0.05
+            for: 2m
+            labels:
+              severity: warning
+            annotations:
+              summary: "High API error rate"
+              description: "{{ $value | humanizePercentage }} of API requests are failing"
+          
+          - alert: ScanDurationHigh
+            expr: histogram_quantile(0.95, rate(scan_duration_seconds_bucket[5m])) > 300
+            for: 5m
+            labels:
+              severity: info
+            annotations:
+              summary: "Scan duration is high"
+              description: "95th percentile scan duration is {{ $value }}s"
+

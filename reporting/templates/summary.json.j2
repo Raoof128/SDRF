@@ -1,0 +1,111 @@
+{
+  "report": {
+    "version": "1.0.0",
+    "generated": "{{ timestamp }}",
+    "scan_target": "{{ scan_target }}",
+    "scan_type": "{{ scan_type|default('repository') }}"
+  },
+  "summary": {
+    "total_findings": {{ total_findings }},
+    "severity_breakdown": {
+      "critical": {{ by_severity.get('critical', 0) }},
+      "high": {{ by_severity.get('high', 0) }},
+      "medium": {{ by_severity.get('medium', 0) }},
+      "low": {{ by_severity.get('low', 0) }}
+    },
+    "unique_secret_types": {{ by_type|length }},
+    "affected_files": {{ by_file|length }}
+  },
+  "top_issues": {
+    "by_type": [
+      {% for secret_type, count in by_type.items()|sort(attribute=1, reverse=true)|list[:10] %}
+      {
+        "type": "{{ secret_type }}",
+        "count": {{ count }},
+        "percentage": {{ "%.2f"|format((count / total_findings * 100) if total_findings > 0 else 0) }}
+      }{% if not loop.last %},{% endif %}
+      {% endfor %}
+    ],
+    "by_file": [
+      {% for file_path, count in top_files[:10] %}
+      {
+        "file": "{{ file_path }}",
+        "findings": {{ count }}
+      }{% if not loop.last %},{% endif %}
+      {% endfor %}
+    ]
+  },
+  "risk_assessment": {
+    "overall_risk": "{% if by_severity.get('critical', 0) > 0 %}CRITICAL{% elif by_severity.get('high', 0) > 0 %}HIGH{% elif by_severity.get('medium', 0) > 0 %}MEDIUM{% else %}LOW{% endif %}",
+    "immediate_action_required": {{ (by_severity.get('critical', 0) + by_severity.get('high', 0)) > 0|lower }},
+    "estimated_remediation_hours": {{ (by_severity.get('critical', 0) * 4 + by_severity.get('high', 0) * 2 + by_severity.get('medium', 0) * 1 + by_severity.get('low', 0) * 0.5)|int }}
+  },
+  "recommendations": {
+    "immediate": [
+      {% if by_severity.get('critical', 0) > 0 %}
+      "Rotate all critical secrets immediately",
+      "Audit access logs for unauthorized usage",
+      "Enable MFA on affected accounts"{% if by_severity.get('high', 0) > 0 %},{% endif %}
+      {% endif %}
+      {% if by_severity.get('high', 0) > 0 %}
+      "Rotate high-severity secrets within 24 hours",
+      "Implement secret management solution"
+      {% endif %}
+    ],
+    "short_term": [
+      "Remove all secrets from source code",
+      "Implement pre-commit hooks for secret detection",
+      "Add secret scanning to CI/CD pipeline"
+    ],
+    "long_term": [
+      "Adopt centralized secret management",
+      "Regular security training for developers",
+      "Implement automated secret rotation",
+      "Regular security audits"
+    ]
+  },
+  "compliance": {
+    "frameworks": [
+      {
+        "name": "PCI-DSS",
+        "requirement": "8.2.1",
+        "status": {% if by_severity.get('critical', 0) > 0 %}"NON_COMPLIANT"{% else %}"REVIEW_REQUIRED"{% endif %},
+        "details": "Strong cryptography and security protocols required"
+      },
+      {
+        "name": "SOC2",
+        "requirement": "CC6.1",
+        "status": {% if total_findings > 0 %}"NON_COMPLIANT"{% else %}"COMPLIANT"{% endif %},
+        "details": "Logical and physical access controls"
+      },
+      {
+        "name": "ISO27001",
+        "requirement": "A.9.4.3",
+        "status": {% if total_findings > 0 %}"NON_COMPLIANT"{% else %}"COMPLIANT"{% endif %},
+        "details": "Password management system requirements"
+      }
+    ]
+  },
+  "rotation_status": {
+    "auto_rotation_enabled": {{ auto_rotation_enabled|default(false)|lower }},
+    "rotations_performed": [
+      {% for rotation in rotations|default([]) %}
+      {
+        "type": "{{ rotation.type }}",
+        "success": {{ rotation.success|lower }},
+        "timestamp": "{{ rotation.timestamp }}",
+        "message": "{{ rotation.message }}"
+      }{% if not loop.last %},{% endif %}
+      {% endfor %}
+    ]
+  },
+  "metadata": {
+    "scan_duration_seconds": {{ scan_duration|default(0) }},
+    "scanner_version": "1.0.0",
+    "detectors_used": [
+      "aws", "azure", "github", "entropy", "regex"
+    ],
+    "files_scanned": {{ files_scanned|default(0) }},
+    "commits_scanned": {{ commits_scanned|default(0) }}
+  }
+}
