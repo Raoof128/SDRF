@@ -6,8 +6,7 @@ import string
 from datetime import datetime, timedelta
 from typing import Dict, List, Optional, Tuple
 
-from github import Github, GithubException
-from github.GithubApp import GithubApp
+from github import Github, GithubException, GithubIntegration
 
 
 class GitHubRotator:
@@ -42,8 +41,8 @@ class GitHubRotator:
         
         # Initialize App if credentials provided
         if self.app_id and self.app_private_key:
-            self.github_app = GithubApp(
-                app_id=self.app_id,
+            self.github_app = GithubIntegration(
+                integration_id=self.app_id,
                 private_key=self.app_private_key
             )
         else:
