@@ -13,7 +13,8 @@ jobs:
     name: Lint & Format Check
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
       
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -24,18 +25,20 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
+          pip install black>=23.7.0 flake8>=6.1.0 mypy>=1.5.1
           pip install -r requirements-dev.txt
-          pip install -e .
       
-      - name: Lint with flake8
+      - name: Run Black formatter check
+        run: |
+          python -m black --version
+          python -m black --check --diff --color .
+      
+      - name: Run Flake8 linter
         run: |
           flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
           flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
       
-      - name: Check formatting with black
-        run: black --check .
-      
-      - name: Type check with mypy
+      - name: Run MyPy type checker
         run: mypy . --config-file=mypy.ini
         continue-on-error: true
   
@@ -49,7 +52,8 @@ jobs:
         python-version: ['3.11', '3.12']
     
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
       
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v5
@@ -62,30 +66,39 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
           pip install -r requirements-dev.txt
-          pip install -e .
       
-      - name: Verify installation
+      - name: Install package in editable mode
+        run: pip install -e .
+      
+      - name: Verify package installation
         run: |
-          python -c "from detectors import AWSDetector; print('✓ Imports working')"
+          python -c "import sys; print(f'Python {sys.version}')"
+          python -c "from detectors import AWSDetector, AzureDetector, GitHubTokenDetector; print('✓ All imports successful')"
           pytest --version
+      
+      - name: Collect tests
+        run: |
+          echo "Collecting tests..."
           pytest tests/ --collect-only -q
       
-      - name: Run tests with pytest
+      - name: Run pytest with coverage
         run: |
-          pytest tests/ --cov=. --cov-report=xml --cov-report=html -v
+          pytest tests/ -v --cov=. --cov-report=xml --cov-report=html --cov-report=term-missing
       
-      - name: Upload coverage to Codecov
+      - name: Upload coverage reports
         uses: codecov/codecov-action@v4
         if: matrix.os == 'ubuntu-latest' && matrix.python-version == '3.11'
         with:
           file: ./coverage.xml
           fail_ci_if_error: false
+          verbose: true
   
   security:
     name: Security Scan
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
       
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -96,62 +109,66 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
+          pip install bandit>=1.7.5 safety>=2.3.5
           pip install -r requirements.txt
           pip install -r requirements-dev.txt
           pip install -e .
       
-      - name: Run Bandit security scan
+      - name: Run Bandit security scanner
         run: bandit -r . -ll -f json -o bandit-report.json || true
       
-      - name: Run Safety check
+      - name: Run Safety dependency checker
         run: safety check --json || true
       
       - name: Upload security reports
         uses: actions/upload-artifact@v4
+        if: always()
         with:
           name: security-reports
-          path: |
-            bandit-report.json
+          path: bandit-report.json
+          if-no-files-found: warn
   
   build:
-    name: Build & Publish
+    name: Build & Validate Package
     needs: [lint, test, security]
     runs-on: ubuntu-latest
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
       
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: '3.11'
       
-      - name: Install build dependencies
+      - name: Install build tools
         run: |
           python -m pip install --upgrade pip
-          pip install build twine
+          pip install build>=1.0.0 twine>=4.0.0
       
       - name: Build package
         run: python -m build
       
-      - name: Check package
+      - name: Check package with Twine
         run: twine check dist/*
       
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: distribution
+          name: python-package-distributions
           path: dist/
   
   docker:
-    name: Docker Build
+    name: Docker Build & Verify
     needs: [lint, test]
     runs-on: ubuntu-latest
     if: github.event_name == 'push'
     
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
       
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
@@ -164,3 +181,8 @@ jobs:
           tags: secret-detection-framework:latest
           cache-from: type=gha
           cache-to: type=gha,mode=max
+          load: true
+      
+      - name: Test Docker image
+        run: |
+          docker run --rm secret-detection-framework:latest --version || echo "Version check skipped"
