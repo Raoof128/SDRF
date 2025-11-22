@@ -1,262 +1,146 @@
-# Secret Detection & Rotation Framework
+# Secret Detection & Rotation Framework (SDRF)
 
-[![CI/CD](https://img.shields.io/github/actions/workflow/status/Raoof128/SDRF/ci.yml?branch=main)](https://github.com/Raoof128/SDRF/actions)
-[![codecov](https://codecov.io/gh/Raoof128/SDRF/branch/main/graph/badge.svg)](https://codecov.io/gh/Raoof128/SDRF)
-[![Python 3.11+](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/downloads/)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
-[![Security: Bandit](https://img.shields.io/badge/security-bandit-yellow.svg)](https://github.com/PyCQA/bandit)
+[![CI/CD](https://img.shields.io/github/actions/workflow/status/Raoof128/SDRF/ci.yml?branch=main&style=flat-square)](https://github.com/Raoof128/SDRF/actions)
+[![Codecov](https://img.shields.io/codecov/c/github/Raoof128/SDRF?style=flat-square)](https://codecov.io/gh/Raoof128/SDRF)
+[![Python Version](https://img.shields.io/badge/python-3.11%2B-blue?style=flat-square)](https://www.python.org/downloads/)
+[![License](https://img.shields.io/badge/license-MIT-green?style=flat-square)](LICENSE)
+[![Code Style](https://img.shields.io/badge/code%20style-black-000000?style=flat-square)](https://github.com/psf/black)
 
-> **Production-grade secret detection and automated credential rotation framework for enterprise security**
+**SDRF** is an enterprise-grade security platform designed to proactively detect hardcoded secrets and automate credential rotation across hybrid cloud environments. It combines high-fidelity scanning with automated remediation workflows to reduce the attack surface of modern software supply chains.
 
-A comprehensive, battle-tested platform for detecting hardcoded secrets in Git repositories, GitHub organizations, and code commits—with automated rotation capabilities for AWS, Azure, and GitHub credentials.
+---
 
-## 🎯 Key Features
+## 🚀 Key Capabilities
 
-### Secret Detection
-- **Multi-Platform Scanning**: Local Git repos, GitHub repos & organizations, commit history
-- **Comprehensive Pattern Matching**: AWS, Azure, GitHub, JWT, SSH keys, database credentials, API tokens
-- **Advanced Detection Engine**: Regex-based + entropy analysis for high-confidence detection
-- **Smart False Positive Filtering**: Contextaware validation to minimize noise
-- **Real-time Monitoring**: Commit hooks and CI/CD integration
+### 🛡️ Advanced Secret Detection
+*   **Multi-Vector Scanning:** Deep inspection of local Git repositories, GitHub organizations, and commit history.
+*   **High-Fidelity Engine:** Hybrid detection using regex patterns and Shannon entropy analysis to identify high-entropy strings (API keys, tokens).
+*   **Context-Aware Filtering:** Intelligent false-positive reduction using context validation and allow-listing.
+*   **Broad Coverage:** Detects credentials for AWS, Azure, GitHub, Stripe, Slack, databases, and generic private keys.
 
-### Automated Credential Rotation
-- **AWS**: IAM access keys, secret access keys, session tokens
-- **Azure**: Service principal secrets, storage account keys, Cosmos DB keys
-- **GitHub**: Personal access tokens, OAuth tokens, deploy keys
-- **Validation**: Post-rotation credential verification
-- **Audit Trail**: Complete rotation history and compliance logging
+### 🔄 Automated Credential Rotation
+*   **AWS:** Rotates IAM Access Keys and updates Secrets Manager.
+*   **Azure:** Rotates Service Principal secrets and updates Key Vault.
+*   **GitHub:** Rotates Personal Access Tokens (PATs) and Deploy Keys.
+*   **Safety First:** Validates new credentials before revoking old ones to prevent service disruption.
 
-### Enterprise Features
-- **RESTful API**: FastAPI-based API for programmatic access
-- **Web Dashboard**: Real-time Streamlit dashboard for visualization
-- **Multiple Report Formats**: JSON, CSV, Markdown, HTML
-- **Configurable Rules**: Custom patterns, severity levels, exclusions
-- **CI/CD Ready**: GitHub Actions, GitLab CI, Jenkins integration
-- **Container Support**: Docker & Kubernetes deployment ready
+### 📊 Enterprise Reporting & Dashboard
+*   **Real-Time Dashboard:** Interactive Streamlit-based visualization of security posture.
+*   **Comprehensive Reports:** Export findings in JSON, CSV, Markdown, or HTML formats.
+*   **REST API:** Fully documented FastAPI backend for integration with SIEM/SOAR platforms.
 
-## 🚀 Quick Start
+---
 
-### Installation
+## 📦 Installation
+
+### Prerequisites
+*   Python 3.11+
+*   Docker (optional, for containerized deployment)
+
+### Quick Start
 
 ```bash
 # Clone the repository
 git clone https://github.com/Raoof128/SDRF.git
-cd secret-detection-framework
+cd SDRF
 
-# Create virtual environment
+# Create and activate virtual environment
 python -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
+source venv/bin/activate  # Windows: venv\Scripts\activate
 
 # Install dependencies
 pip install -r requirements.txt
-
-# Optional: Install development dependencies
-pip install -r requirements-dev.txt
-
-# Set up pre-commit hooks (recommended)
-pre-commit install
 ```
 
-### Basic Usage
+---
 
-#### 1. **Scan a Local Repository**
+## 💻 Usage
+
+### CLI Interface
+
+The `secretctl` CLI provides a unified interface for all operations.
+
+**1. Scan a Local Repository**
 ```bash
-python -m cli.secretctl scan local /path/to/repo --output report.json
+python -m cli.secretctl scan local ./path/to/repo --output report.json
 ```
 
-#### 2. **Scan GitHub Repository**
+**2. Scan a GitHub Organization**
 ```bash
-export GITHUB_TOKEN="your_token_here"
-python -m cli.secretctl scan github --repo owner/repo --token $GITHUB_TOKEN
+export GITHUB_TOKEN="ghp_..."
+python -m cli.secretctl scan github-org --org my-org --token $GITHUB_TOKEN
 ```
 
-#### 3. **Scan Entire GitHub Organization**
+**3. Rotate AWS Credentials**
 ```bash
-python -m cli.secretctl scan github-org --org yourorg --token $GITHUB_TOKEN
+python -m cli.secretctl rotate aws --access-key AKIA... --region us-east-1
 ```
 
-#### 4. **Rotate Compromised AWS Credentials**
-```bash
-python -m cli.secretctl rotate aws --access-key AKIAIOSFODNN7EXAMPLE
-```
+### Web Dashboard
 
-#### 5. **Start the Web Dashboard**
+Launch the interactive dashboard to visualize scan results and manage configurations.
+
 ```bash
 streamlit run dashboard/app.py
 ```
 
-#### 6. **Launch API Server**
+### REST API
+
+Start the API server for programmatic access.
+
 ```bash
 uvicorn api.server:app --host 0.0.0.0 --port 8000
 ```
 
-## 📖 Documentation
+---
 
-- **[Architecture Overview](ARCHITECTURE.md)** - System design and component details
-- **[API Documentation](API_DOCUMENTATION.md)** - Complete API reference
-- **[Contributing Guide](CONTRIBUTING.md)** - How to contribute
-- **[Security Policy](SECURITY.md)** - Security practices and reporting
-- **[Change Log](CHANGELOG.md)** - Version history
+## 🐳 Deployment
 
-## 🔍 Supported Secret Types
+### Docker Compose
 
-| Category | Detected Secrets |
-|----------|------------------|
-| **AWS** | Access Keys, Secret Keys, Session Tokens, MWS Keys, S3 Buckets, RDS Passwords, KMS Keys, IAM Roles |
-| **Azure** | Client Secrets, Tenant IDs, Subscription IDs, Storage Keys, Connection Strings, Cosmos DB Keys |
-| **GitHub** | Personal Access Tokens, OAuth Tokens, App Tokens, Refresh Tokens, SSH Keys |
-| **General** | JWT Tokens, Database URLs, API Keys, Generic High-Entropy Strings |
-
-## 🛠️ Configuration
-
-### Environment Variables
-```bash
-# GitHub Integration
-GITHUB_TOKEN=ghp_your_token_here
-
-# AWS Credentials (for rotation)
-AWS_ACCESS_KEY_ID=your_key
-AWS_SECRET_ACCESS_KEY=your_secret
-
-# Azure Credentials (for rotation)
-AZURE_CLIENT_ID=your_client_id
-AZURE_CLIENT_SECRET=your_secret
-AZURE_TENANT_ID=your_tenant_id
-
-# Optional: Custom Configuration
-SECRET_CONFIG_PATH=/path/to/custom/patterns.json
-```
-
-### Custom Patterns
-Edit `config/patterns.json` to add custom detection patterns:
-
-```json
-{
-  "patterns": {
-    "custom": {
-      "my_secret": {
-        "regex": "mycompany_[a-zA-Z0-9]{32}",
-        "severity": "high",
-        "description": "Custom Company Secret"
-      }
-    }
-  }
-}
-```
-
-## 🧪 Testing
+Deploy the full stack (API, Dashboard, Database) using Docker Compose.
 
 ```bash
-# Run full test suite
-pytest
-
-# Run with coverage
-pytest --cov=. --cov-report=html
-
-# Run specific test module
-pytest tests/test_detectors.py -v
-
-# Run linting
-make lint
-
-# Run formatters
-make format
-```
-
-## 🐳 Docker Deployment
-
-### Using Docker
-
-```bash
-# Build image
-docker build -t secret-detection-framework .
-
-# Run container
-docker run -p 8000:8000 -p 8501:8501 \
-  -e GITHUB_TOKEN=$GITHUB_TOKEN \
-  secret-detection-framework
-```
-
-### Using Docker Compose
-
-```bash
-# Start all services
 docker-compose up -d
-
-# View logs
-docker-compose logs -f
-
-# Stop services
-docker-compose down
 ```
 
 ### Kubernetes
 
+Production-ready Kubernetes manifests are available in the `k8s/` directory.
+
 ```bash
-# Deploy to Kubernetes
 kubectl apply -f k8s/
-
-# Check deployment
-kubectl get pods -n secret-detection
 ```
-
-## 📊 Performance
-
-- **Scan Speed**: ~1000 files/second
-- **Memory Usage**: < 500MB for typical repos
-- **API Latency**: < 100ms average response time
-- **Concurrent Scans**: Supports multi-threading
-- **Database**: Optional persistence with PostgreSQL
-
-## 🔒 Security Best Practices
-
-1. **Never commit `.env` files** - Use environment variables
-2. **Rotate detected secrets immediately** - Use automated rotation features
-3. **Enable commit hooks** - Prevent secrets from being committed
-4. **Regular scans** - Schedule periodic organization-wide scans
-5. **Audit logs** - Review rotation and detection logs regularly
-6. **Access control** - Limit who can perform rotations
-7. **Network security** - Use VPN/private networks for API access
-
-## 🤝 Contributing
-
-We welcome contributions! Please see our [Contributing Guide](CONTRIBUTING.md) for details.
-
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
-
-## 📜 License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-## 🙏 Acknowledgments
-
-- Built with [FastAPI](https://fastapi.tiangolo.com/), [Streamlit](https://streamlit.io/), and [GitPython](https://gitpython.readthedocs.io/)
-- Inspired by industry tools like [truffleHog](https://github.com/trufflesecurity/truffleHog) and [git-secrets](https://github.com/awslabs/git-secrets)
-- Thanks to all contributors who have helped improve this framework
-
-## 📞 Support
-
-- **Issues**: [GitHub Issues](https://github.com/Raoof128/SDRF/issues)
-- **Discussions**: [GitHub Discussions](https://github.com/Raoof128/SDRF/discussions)
-- **Email**: security@secret-framework.io
-
-## 🗺️ Roadmap
-
-- [ ] Support for additional cloud providers (GCP, DigitalOcean)
-- [ ] Machine learning-based detection
-- [ ] Integration with SIEM platforms
-- [ ] Slack/Teams notifications
-- [ ] Policy-as-code enforcement
-- [ ] Advanced analytics dashboard
-- [ ] Multi-tenant support
 
 ---
 
-**⭐ Star this repository if you find it helpful!**
+## 📚 Documentation
 
-Made with ❤️ for the security community
+*   [**Architecture Overview**](ARCHITECTURE.md): System design and component interaction.
+*   [**API Reference**](API_DOCUMENTATION.md): OpenAPI specification for the REST API.
+*   [**Security Policy**](SECURITY.md): Vulnerability reporting and security best practices.
+*   [**Contributing Guidelines**](CONTRIBUTING.md): Standards for code contributions.
+
+---
+
+## 🤝 Contributing
+
+We welcome contributions from the community. Please read our [Contributing Guidelines](CONTRIBUTING.md) before submitting a Pull Request.
+
+1.  Fork the repository.
+2.  Create a feature branch (`git checkout -b feature/new-detector`).
+3.  Commit your changes (`git commit -m 'Add new detector'`).
+4.  Push to the branch (`git push origin feature/new-detector`).
+5.  Open a Pull Request.
+
+---
+
+## 📄 License
+
+This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
+
+---
+
+<div align="center">
+  <sub>Built with ❤️ by the Security Engineering Team</sub>
+</div>
