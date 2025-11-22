@@ -8,7 +8,7 @@ result = subprocess.run(
     ["python", "-m", "pytest", "tests/", "--collect-only", "-q"],
     cwd="/Users/raoof.r12/projects/secret-detection-framework-production",
     capture_output=True,
-    text=True
+    text=True,
 )
 
 print("STDOUT:")
