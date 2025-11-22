@@ -25,6 +25,7 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements-dev.txt
+          pip install -e .
       
       - name: Lint with flake8
         run: |
@@ -61,6 +62,7 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
           pip install -r requirements-dev.txt
+          pip install -e .
       
       - name: Run tests with pytest
         run: |
@@ -90,6 +92,7 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
           pip install -r requirements-dev.txt
+          pip install -e .
       
       - name: Run Bandit security scan
         run: bandit -r . -ll -f json -o bandit-report.json || true
