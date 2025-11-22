@@ -2,49 +2,54 @@
 
 [![CI/CD](https://img.shields.io/github/actions/workflow/status/Raoof128/SDRF/ci.yml?branch=main&style=flat-square)](https://github.com/Raoof128/SDRF/actions)
 [![Codecov](https://img.shields.io/codecov/c/github/Raoof128/SDRF?style=flat-square)](https://codecov.io/gh/Raoof128/SDRF)
-[![Python Version](https://img.shields.io/badge/python-3.11%2B-blue?style=flat-square)](https://www.python.org/downloads/)
+[![Python](https://img.shields.io/badge/python-3.11%2B-blue?style=flat-square)](https://www.python.org)
 [![License](https://img.shields.io/badge/license-MIT-green?style=flat-square)](LICENSE)
 [![Code Style](https://img.shields.io/badge/code%20style-black-000000?style=flat-square)](https://github.com/psf/black)
 
-**SDRF** is an enterprise-grade security platform designed to proactively detect hardcoded secrets and automate credential rotation across hybrid cloud environments. It combines high-fidelity scanning with automated remediation workflows to reduce the attack surface of modern software supply chains.
+> **Enterprise security platform for automated secret detection and credential rotation**
+
+SDRF is a production-ready framework that detects hardcoded secrets in Git repositories and automates credential rotation across AWS, Azure, and GitHub. Designed for DevSecOps teams managing hybrid cloud environments.
 
 ---
 
-## 🚀 Key Capabilities
+## Features
 
-### 🛡️ Advanced Secret Detection
-*   **Multi-Vector Scanning:** Deep inspection of local Git repositories, GitHub organizations, and commit history.
-*   **High-Fidelity Engine:** Hybrid detection using regex patterns and Shannon entropy analysis to identify high-entropy strings (API keys, tokens).
-*   **Context-Aware Filtering:** Intelligent false-positive reduction using context validation and allow-listing.
-*   **Broad Coverage:** Detects credentials for AWS, Azure, GitHub, Stripe, Slack, databases, and generic private keys.
+### 🔍 Secret Detection
+- **Local Repository Scanning**: Deep inspection of Git repositories including commit history
+- **GitHub Organization Scanning**: Scan entire organizations with multi-repository support
+- **Pattern-Based Detection**: Regex patterns for AWS keys, Azure credentials, GitHub tokens, JWTs, SSH keys, and more
+- **Entropy Analysis**: Shannon entropy calculation to identify high-entropy strings (API keys, tokens)
+- **Context-Aware Validation**: Reduces false positives through intelligent filtering
 
-### 🔄 Automated Credential Rotation
-*   **AWS:** Rotates IAM Access Keys and updates Secrets Manager.
-*   **Azure:** Rotates Service Principal secrets and updates Key Vault.
-*   **GitHub:** Rotates Personal Access Tokens (PATs) and Deploy Keys.
-*   **Safety First:** Validates new credentials before revoking old ones to prevent service disruption.
+### 🔄 Automated Rotation
+- **AWS**: IAM Access Key rotation with automatic validation
+- **Azure**: Service Principal secret rotation with Key Vault integration
+- **GitHub**: PAT revocation, Deploy Key rotation, Webhook secret rotation
+- **Safe Rotation**: Validates new credentials before deactivating old ones
 
-### 📊 Enterprise Reporting & Dashboard
-*   **Real-Time Dashboard:** Interactive Streamlit-based visualization of security posture.
-*   **Comprehensive Reports:** Export findings in JSON, CSV, Markdown, or HTML formats.
-*   **REST API:** Fully documented FastAPI backend for integration with SIEM/SOAR platforms.
+### 📊 Reporting & Integration
+- **CLI Interface**: `secretctl` command-line tool for all operations
+- **Web Dashboard**: Real-time Streamlit dashboard for visualization
+- **REST API**: FastAPI backend for SIEM/SOAR integration
+- **Multiple Formats**: JSON, CSV, Markdown, HTML report generation
 
 ---
 
-## 📦 Installation
+## Installation
 
-### Prerequisites
-*   Python 3.11+
-*   Docker (optional, for containerized deployment)
+### Requirements
+- Python 3.11 or higher
+- Git
+- Docker (optional)
 
-### Quick Start
+### Quick Install
 
 ```bash
 # Clone the repository
 git clone https://github.com/Raoof128/SDRF.git
 cd SDRF
 
-# Create and activate virtual environment
+# Create virtual environment
 python -m venv venv
 source venv/bin/activate  # Windows: venv\Scripts\activate
 
@@ -54,90 +59,232 @@ pip install -r requirements.txt
 
 ---
 
-## 💻 Usage
+## Usage
 
-### CLI Interface
+### CLI Commands
 
-The `secretctl` CLI provides a unified interface for all operations.
+The `secretctl` CLI provides a unified interface:
 
-**1. Scan a Local Repository**
+#### **Scan Local Repository**
 ```bash
-python -m cli.secretctl scan local ./path/to/repo --output report.json
+python -m cli.secretctl scan local ./path/to/repo
+python -m cli.secretctl scan local ./path/to/repo --history --max-commits 500 --output json
 ```
 
-**2. Scan a GitHub Organization**
+#### **Scan GitHub Repository**
 ```bash
-export GITHUB_TOKEN="ghp_..."
-python -m cli.secretctl scan github-org --org my-org --token $GITHUB_TOKEN
+export GITHUB_TOKEN="ghp_your_token"
+python -m cli.secretctl scan github owner/repo
+python -m cli.secretctl scan github owner/repo --history --prs --output markdown
 ```
 
-**3. Rotate AWS Credentials**
+#### **Scan GitHub Organization**
 ```bash
-python -m cli.secretctl rotate aws --access-key AKIA... --region us-east-1
+python -m cli.secretctl scan org my-organization --max-repos 100
+```
+
+#### **Rotate AWS Credentials**
+```bash
+python -m cli.secretctl rotate aws AKIA... --user john.doe --region us-east-1
+```
+
+#### **Rotate Azure Credentials**
+```bash
+export AZURE_TENANT_ID="your-tenant-id"
+python -m cli.secretctl rotate azure <service-principal-id> --validity-days 180
+```
+
+#### **Rotate GitHub Credentials**
+```bash
+# Revoke Personal Access Token
+python -m cli.secretctl rotate github pat --token ghp_...
+
+# Rotate Deploy Key
+python -m cli.secretctl rotate github deploy-key --repo owner/repo
+
+# Rotate Webhook Secret
+python -m cli.secretctl rotate github webhook --repo owner/repo
 ```
 
 ### Web Dashboard
 
-Launch the interactive dashboard to visualize scan results and manage configurations.
+Launch the interactive dashboard:
 
 ```bash
+python -m cli.secretctl dashboard
+# Or directly:
 streamlit run dashboard/app.py
 ```
 
 ### REST API
 
-Start the API server for programmatic access.
+Start the API server:
 
 ```bash
 uvicorn api.server:app --host 0.0.0.0 --port 8000
 ```
 
+API documentation available at `http://localhost:8000/docs`
+
 ---
 
-## 🐳 Deployment
+## Configuration
+
+### Environment Variables
+
+```bash
+# GitHub
+export GITHUB_TOKEN="ghp_your_token"
+
+# AWS (for rotation)
+export AWS_ACCESS_KEY_ID="your_key"
+export AWS_SECRET_ACCESS_KEY="your_secret"
+export AWS_DEFAULT_REGION="us-east-1"
+
+# Azure (for rotation)
+export AZURE_TENANT_ID="your_tenant_id"
+export AZURE_CLIENT_ID="your_client_id"
+export AZURE_CLIENT_SECRET="your_secret"
+export AZURE_SUBSCRIPTION_ID="your_subscription_id"
+```
+
+### Custom Patterns
+
+Edit `config/patterns.json` to add custom detection patterns:
+
+```json
+{
+  "patterns": {
+    "custom_api_key": {
+      "regex": "custom_api_key=[a-zA-Z0-9]{32}",
+      "severity": "high",
+      "description": "Custom API Key"
+    }
+  }
+}
+```
+
+---
+
+## Deployment
+
+### Docker
+
+```bash
+# Build and run
+docker build -t sdrf .
+docker run -p 8000:8000 -p 8501:8501 \
+  -e GITHUB_TOKEN=$GITHUB_TOKEN \
+  sdrf
+```
 
 ### Docker Compose
 
-Deploy the full stack (API, Dashboard, Database) using Docker Compose.
-
 ```bash
+# Start all services (API + Dashboard)
 docker-compose up -d
+
+# View logs
+docker-compose logs -f
+
+# Stop services
+docker-compose down
 ```
 
 ### Kubernetes
 
-Production-ready Kubernetes manifests are available in the `k8s/` directory.
-
 ```bash
+# Deploy to cluster
 kubectl apply -f k8s/
+
+# Check status
+kubectl get pods -n sdrf
 ```
 
 ---
 
-## 📚 Documentation
+## Testing
 
-*   [**Architecture Overview**](ARCHITECTURE.md): System design and component interaction.
-*   [**API Reference**](API_DOCUMENTATION.md): OpenAPI specification for the REST API.
-*   [**Security Policy**](SECURITY.md): Vulnerability reporting and security best practices.
-*   [**Contributing Guidelines**](CONTRIBUTING.md): Standards for code contributions.
+```bash
+# Run full test suite
+pytest
+
+# Run with coverage
+pytest --cov=. --cov-report=html
+
+# Run specific tests
+pytest tests/test_detectors.py -v
+
+# Linting
+flake8 .
+black --check .
+mypy .
+```
 
 ---
 
-## 🤝 Contributing
+## Project Structure
 
-We welcome contributions from the community. Please read our [Contributing Guidelines](CONTRIBUTING.md) before submitting a Pull Request.
-
-1.  Fork the repository.
-2.  Create a feature branch (`git checkout -b feature/new-detector`).
-3.  Commit your changes (`git commit -m 'Add new detector'`).
-4.  Push to the branch (`git push origin feature/new-detector`).
-5.  Open a Pull Request.
+```
+SDRF/
+├── cli/                    # CLI interface (secretctl)
+├── api/                    # FastAPI REST API
+├── dashboard/              # Streamlit web dashboard
+├── detectors/              # Secret detection engines
+│   ├── aws_detector.py
+│   ├── azure_detector.py
+│   ├── github_token_detector.py
+│   ├── generic_entropy.py
+│   └── regex_engine.py
+├── scanners/               # Repository scanners
+│   ├── git_scanner.py
+│   ├── github_scanner.py
+│   └── commit_history.py
+├── rotators/               # Credential rotation
+│   ├── aws_rotator.py
+│   ├── azure_rotator.py
+│   └── github_rotator.py
+├── reporting/              # Report generation
+├── tests/                  # Test suite
+├── k8s/                    # Kubernetes manifests
+├── .github/                # CI/CD workflows
+└── docs/                   # Documentation
+```
 
 ---
 
-## 📄 License
+## Documentation
 
-This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
+- **[Architecture](ARCHITECTURE.md)**: System design and component architecture
+- **[API Reference](API_DOCUMENTATION.md)**: OpenAPI specification for the REST API
+- **[Security Policy](SECURITY.md)**: Vulnerability reporting and security guidelines
+- **[Contributing](CONTRIBUTING.md)**: Development guidelines and contribution standards
+- **[Changelog](CHANGELOG.md)**: Version history and release notes
+
+---
+
+## Contributing
+
+We welcome contributions! Please read [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
+
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/new-detector`)
+3. Commit your changes (`git commit -m 'Add new detector'`)
+4. Push to the branch (`git push origin feature/new-detector`)
+5. Open a Pull Request
+
+---
+
+## License
+
+This project is licensed under the MIT License. See [LICENSE](LICENSE) for details.
+
+---
+
+## Support
+
+- **Issues**: [GitHub Issues](https://github.com/Raoof128/SDRF/issues)
+- **Discussions**: [GitHub Discussions](https://github.com/Raoof128/SDRF/discussions)
 
 ---
 
