@@ -112,7 +112,7 @@ To add support for rotating credentials on a new platform:
 
 ```bash
 # Clone the repository
-git clone https://github.com/your-org/secret-framework.git
+git clone https://github.com/Raoof128/SDRF.git
 cd secret-framework
 
 # Create virtual environment

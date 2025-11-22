@@ -103,11 +103,11 @@ test = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/your-org/secret-framework"
-Documentation = "https://secret-framework.readthedocs.io"
-Repository = "https://github.com/your-org/secret-framework"
-Issues = "https://github.com/your-org/secret-framework/issues"
-Changelog = "https://github.com/your-org/secret-framework/blob/main/CHANGELOG.md"
+Homepage = "https://github.com/Raoof128/SDRF"
+Documentation = "https://github.com/Raoof128/SDRF/blob/main/README.md"
+Repository = "https://github.com/Raoof128/SDRF"
+Issues = "https://github.com/Raoof128/SDRF/issues"
+Changelog = "https://github.com/Raoof128/SDRF/blob/main/CHANGELOG.md"
 
 [project.scripts]
 secretctl = "cli.secretctl:cli"

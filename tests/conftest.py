@@ -6,6 +6,8 @@ from typing import Generator
 
 import pytest
 import git
+import os
+from unittest.mock import Mock
 
 
 @pytest.fixture(scope="session")

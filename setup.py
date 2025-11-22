@@ -11,11 +11,11 @@ setup(
     name="secret-detection-framework",
     version="1.0.0",
     author="Security Team",
-    author_email="security@example.com",
+    author_email="security@secret-framework.io",
     description="A comprehensive framework for detecting and rotating secrets in Git repositories",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    url="https://github.com/your-org/secret-framework",
+    url="https://github.com/Raoof128/SDRF",
     packages=find_packages(exclude=["tests", "tests.*", "docs", "docs.*"]),
     classifiers=[
         "Development Status :: 4 - Beta",

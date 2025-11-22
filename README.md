@@ -1,10 +1,11 @@
 # Secret Detection & Rotation Framework
 
-[![CI/CD](https://img.shields.io/github/actions/workflow/status/yourusername/secret-detection-framework/ci.yml?branch=main)](https://github.com/yourusername/secret-detection-framework/actions)
-[![codecov](https://codecov.io/gh/yourusername/secret-detection-framework/branch/main/graph/badge.svg)](https://codecov.io/gh/yourusername/secret-detection-framework)
-[![Python 3.9+](https://img.shields.io/badge/python-3.9+-blue.svg)](https://www.python.org/downloads/)
+[![CI/CD](https://img.shields.io/github/actions/workflow/status/Raoof128/SDRF/ci.yml?branch=main)](https://github.com/Raoof128/SDRF/actions)
+[![codecov](https://codecov.io/gh/Raoof128/SDRF/branch/main/graph/badge.svg)](https://codecov.io/gh/Raoof128/SDRF)
+[![Python 3.11+](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
+[![Security: Bandit](https://img.shields.io/badge/security-bandit-yellow.svg)](https://github.com/PyCQA/bandit)
 
 > **Production-grade secret detection and automated credential rotation framework for enterprise security**
 
@@ -40,7 +41,7 @@ A comprehensive, battle-tested platform for detecting hardcoded secrets in Git r
 
 ```bash
 # Clone the repository
-git clone https://github.com/yourusername/secret-detection-framework.git
+git clone https://github.com/Raoof128/SDRF.git
 cd secret-detection-framework
 
 # Create virtual environment
@@ -240,8 +241,8 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 📞 Support
 
-- **Issues**: [GitHub Issues](https://github.com/yourusername/secret-detection-framework/issues)
-- **Discussions**: [GitHub Discussions](https://github.com/yourusername/secret-detection-framework/discussions)
+- **Issues**: [GitHub Issues](https://github.com/Raoof128/SDRF/issues)
+- **Discussions**: [GitHub Discussions](https://github.com/Raoof128/SDRF/discussions)
 - **Email**: security@secret-framework.io
 
 ## 🗺️ Roadmap
