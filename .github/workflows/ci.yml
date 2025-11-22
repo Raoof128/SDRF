@@ -64,6 +64,12 @@ jobs:
           pip install -r requirements-dev.txt
           pip install -e .
       
+      - name: Verify installation
+        run: |
+          python -c "from detectors import AWSDetector; print('✓ Imports working')"
+          pytest --version
+          pytest tests/ --collect-only -q
+      
       - name: Run tests with pytest
         run: |
           pytest tests/ --cov=. --cov-report=xml --cov-report=html -v
