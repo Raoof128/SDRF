@@ -6,7 +6,7 @@ import os
 import re
 from datetime import datetime, timedelta
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, List, Optional, Tuple, Union
 
 from logging_config import get_logger
 
@@ -393,7 +393,7 @@ class JSONUtils:
         Returns:
             Flattened dictionary
         """
-        items = []
+        items: List[Tuple[str, Any]] = []
         for k, v in d.items():
             new_key = f"{parent_key}{sep}{k}" if parent_key else k
             if isinstance(v, dict):
@@ -432,7 +432,7 @@ class RetryHelper:
         import time
 
         delay = initial_delay
-        last_exception = None
+        last_exception: Optional[BaseException] = None
 
         for attempt in range(max_attempts):
             try:
@@ -444,7 +444,9 @@ class RetryHelper:
                     time.sleep(delay)
                     delay *= backoff_factor
 
-        raise last_exception
+        if last_exception is not None:
+            raise last_exception
+        raise RuntimeError("Retry failed without capturing an exception")
 
 
 # Export commonly used functions at module level

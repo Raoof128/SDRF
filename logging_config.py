@@ -73,7 +73,9 @@ def setup_logging(
         Configured logger instance
     """
     # Get log level from environment or parameter
-    log_level_name = (level or os.getenv("LOG_LEVEL", "INFO")).upper()
+    env_level = os.getenv("LOG_LEVEL")
+    resolved_level = level if level is not None else env_level
+    log_level_name = (resolved_level or "INFO").upper()
     log_level_attr = getattr(logging, log_level_name, None)
     log_level = log_level_attr if isinstance(log_level_attr, int) else logging.INFO
 
