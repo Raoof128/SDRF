@@ -2,13 +2,16 @@
 
 import csv
 import json
+import logging
 from datetime import datetime
 from pathlib import Path
-from typing import Dict, List, Optional, Any
+from typing import Any, Dict, List, Optional
 
 from jinja2 import Environment, FileSystemLoader, Template
 
 from detectors import SecretFinding
+
+logger = logging.getLogger(__name__)
 
 
 class Reporter:
@@ -51,8 +54,8 @@ class Reporter:
             try:
                 template = self.env.get_template("report.md.j2")
                 content = template.render(**report_data)
-            except:
-                # Fallback if template not found
+            except Exception as exc:
+                logger.warning("Falling back to inline markdown generation: %s", exc)
                 content = self._generate_markdown_content(report_data)
         else:
             content = self._generate_markdown_content(report_data)
@@ -74,7 +77,7 @@ class Reporter:
         content = []
 
         # Header
-        content.append(f"# Secret Detection Report\n")
+        content.append("# Secret Detection Report\n")
         content.append(f"**Generated:** {data['timestamp']}\n")
         content.append(f"**Target:** {data['scan_target']}\n")
         content.append(f"**Total Findings:** {data['total_findings']}\n")
@@ -89,7 +92,9 @@ class Reporter:
         # Severity breakdown
         content.append("### Severity Breakdown\n")
         for severity, count in data["by_severity"].items():
-            emoji = {"critical": "🔴", "high": "🟠", "medium": "🟡", "low": "🟢"}.get(severity, "⚪")
+            emoji = {"critical": "🔴", "high": "🟠", "medium": "🟡", "low": "🟢"}.get(
+                severity, "⚪"
+            )
             content.append(f"- {emoji} **{severity.capitalize()}**: {count} findings\n")
         content.append("\n")
 

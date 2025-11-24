@@ -58,7 +58,6 @@ logs/
 *.log
 *.bak
 error*.log
-test_*.py
 debug_*.py
 
 # Secrets (important!)
@@ -71,7 +70,6 @@ credentials/
 # Reports
 reports/
 *.html
-*.json
 bandit-report.json
 
 # Temporary files

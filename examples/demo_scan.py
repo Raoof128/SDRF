@@ -30,7 +30,7 @@ def demo_local_scan():
     findings = scanner.scan()
     stats = scanner.get_statistics()
 
-    print(f"\n✅ Scan complete!")
+    print("\n✅ Scan complete!")
     print(f"   Total findings: {len(findings)}")
     print(f"   Critical: {stats['by_severity'].get('critical', 0)}")
     print(f"   High: {stats['by_severity'].get('high', 0)}")
@@ -71,7 +71,7 @@ def demo_github_scan():
         findings = scanner.scan_repository("octocat/Hello-World")
         stats = scanner.get_statistics()
 
-        print(f"\n✅ Scan complete!")
+        print("\n✅ Scan complete!")
         print(f"   Total findings: {len(findings)}")
 
         if findings:
