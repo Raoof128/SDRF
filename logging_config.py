@@ -3,27 +3,31 @@
 import logging
 import logging.handlers
 import os
+import re
 import sys
 from datetime import datetime
 from pathlib import Path
-from typing import Optional
+from typing import Callable, Match, Optional, Tuple, Union
 
 
 class SecretMaskingFormatter(logging.Formatter):
     """Custom formatter that masks potential secrets in log messages."""
 
     # Patterns to mask in logs
-    MASK_PATTERNS = [
-        (r"(AKIA[0-9A-Z]{16})", "[AWS_KEY_MASKED]"),  # AWS keys
-        (r"(ghp_[a-zA-Z0-9]{36})", "[GITHUB_TOKEN_MASKED]"),  # GitHub PAT
-        (r"(gho_[a-zA-Z0-9]{36})", "[GITHUB_OAUTH_MASKED]"),  # GitHub OAuth
+    MASK_PATTERNS: Tuple[
+        Tuple[str, Union[str, Callable[[Match[str]], str]]],
+        ...,
+    ] = (
+        (r"(AKIA[0-9A-Z]{16})", "[AWS_KEY_MASKED]"),
+        (r"(ghp_[a-zA-Z0-9]{36})", "[GITHUB_TOKEN_MASKED]"),
+        (r"(gho_[a-zA-Z0-9]{36})", "[GITHUB_OAUTH_MASKED]"),
         (
             r"([a-zA-Z0-9_-]{32,})",
             lambda m: (
                 m.group(1)[:4] + "..." + m.group(1)[-4:] if len(m.group(1)) > 20 else m.group(1)
             ),
         ),
-    ]
+    )
 
     def format(self, record: logging.LogRecord) -> str:
         """Format log record with secret masking.
@@ -39,7 +43,6 @@ class SecretMaskingFormatter(logging.Formatter):
 
         # Mask potential secrets
         masked = original
-        import re
 
         for pattern, replacement in self.MASK_PATTERNS:
             if callable(replacement):
@@ -52,7 +55,7 @@ class SecretMaskingFormatter(logging.Formatter):
 
 def setup_logging(
     name: str = "secret_framework",
-    level: str = None,
+    level: Optional[str] = None,
     log_file: Optional[str] = None,
     log_format: str = "json",
     enable_audit: bool = True,
@@ -70,8 +73,11 @@ def setup_logging(
         Configured logger instance
     """
     # Get log level from environment or parameter
-    log_level = level or os.getenv("LOG_LEVEL", "INFO")
-    log_level = getattr(logging, log_level.upper(), logging.INFO)
+    env_level = os.getenv("LOG_LEVEL")
+    resolved_level = level if level is not None else env_level
+    log_level_name = (resolved_level or "INFO").upper()
+    log_level_attr = getattr(logging, log_level_name, None)
+    log_level = log_level_attr if isinstance(log_level_attr, int) else logging.INFO
 
     # Create logger
     logger = logging.getLogger(name)

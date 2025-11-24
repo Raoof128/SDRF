@@ -3,7 +3,7 @@
 import math
 import re
 from collections import Counter
-from typing import Dict, List, Optional, Set, Tuple
+from typing import Any, Dict, List, Optional, Set, Tuple
 
 from .regex_engine import RegexEngine, SecretFinding
 
@@ -199,7 +199,7 @@ class EntropyDetector(RegexEngine):
 
         return False
 
-    def get_string_characteristics(self, string: str) -> Dict[str, any]:
+    def get_string_characteristics(self, string: str) -> Dict[str, Any]:
         """Analyze characteristics of a string.
 
         Args:
@@ -294,7 +294,7 @@ class EntropyDetector(RegexEngine):
         return findings
 
     def calculate_confidence(
-        self, entropy: float, characteristics: Dict[str, any], has_sensitive_context: bool
+        self, entropy: float, characteristics: Dict[str, Any], has_sensitive_context: bool
     ) -> float:
         """Calculate confidence score for a finding.
 
@@ -341,7 +341,7 @@ class EntropyDetector(RegexEngine):
         return min(confidence, 0.95)  # Cap at 0.95
 
     def determine_severity(
-        self, entropy: float, characteristics: Dict[str, any], has_sensitive_context: bool
+        self, entropy: float, characteristics: Dict[str, Any], has_sensitive_context: bool
     ) -> str:
         """Determine severity level of a finding.
 

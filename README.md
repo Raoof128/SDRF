@@ -882,7 +882,10 @@ make lint
 make format
 
 # Run type checking
-make type-check
+make typecheck
+
+# Run pre-commit hooks across the repo
+pre-commit run --all-files
 ```
 
 ### Code Quality Tools

@@ -1,12 +1,14 @@
 #!/usr/bin/env python3
 """
 Demo Script: Secret Detection & Rotation Framework
-This script demonstrates the basic usage of the framework.
+
+Demonstration script for basic framework usage.
 """
 
 import os
 import sys
 from pathlib import Path
+from typing import Any, Dict
 
 # Add parent directory to path
 sys.path.insert(0, str(Path(__file__).parent.parent))
@@ -28,7 +30,7 @@ def demo_local_scan():
     scanner = GitScanner(repo_path=".", scan_history=True, max_commits=50)
 
     findings = scanner.scan()
-    stats = scanner.get_statistics()
+    stats: Dict[str, Dict[str, Any]] = scanner.get_statistics()
 
     print("\n✅ Scan complete!")
     print(f"   Total findings: {len(findings)}")

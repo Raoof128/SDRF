@@ -97,7 +97,7 @@ class RegexEngine:
         self, text: str, file_path: str = "unknown", commit_info: Optional[Dict[str, str]] = None
     ) -> List[SecretFinding]:
         """Scan text for secrets using all patterns."""
-        findings = []
+        findings: List[SecretFinding] = []
         lines = text.split("\n")
 
         for category, patterns in self.patterns.items():
@@ -222,24 +222,25 @@ class RegexEngine:
 
     def get_statistics(self, findings: List[SecretFinding]) -> Dict[str, Any]:
         """Generate statistics from findings."""
-        stats = {
-            "total": len(findings),
-            "by_severity": {},
-            "by_type": {},
-            "by_file": {},
-        }
+        by_severity: Dict[str, int] = {}
+        by_type: Dict[str, int] = {}
+        by_file: Dict[str, int] = {}
 
         for finding in findings:
-            # By severity
             severity = finding.severity
-            stats["by_severity"][severity] = stats["by_severity"].get(severity, 0) + 1
+            by_severity[severity] = by_severity.get(severity, 0) + 1
 
-            # By type
             secret_type = finding.secret_type
-            stats["by_type"][secret_type] = stats["by_type"].get(secret_type, 0) + 1
+            by_type[secret_type] = by_type.get(secret_type, 0) + 1
 
-            # By file
             file_path = finding.file_path
-            stats["by_file"][file_path] = stats["by_file"].get(file_path, 0) + 1
+            by_file[file_path] = by_file.get(file_path, 0) + 1
+
+        stats: Dict[str, Any] = {
+            "total": len(findings),
+            "by_severity": by_severity,
+            "by_type": by_type,
+            "by_file": by_file,
+        }
 
         return stats

@@ -1,10 +1,12 @@
-"""Custom exceptions for Secret Detection & Rotation Framework."""
+"""Custom exception hierarchy for the Secret Detection & Rotation Framework."""
+
+from typing import Any, Dict, Optional
 
 
 class SecretFrameworkError(Exception):
     """Base exception for all framework errors."""
 
-    def __init__(self, message: str, details: dict = None):
+    def __init__(self, message: str, details: Optional[Dict[str, Any]] = None):
         """Initialize exception with message and optional details.
 
         Args:
@@ -13,7 +15,7 @@ class SecretFrameworkError(Exception):
         """
         super().__init__(message)
         self.message = message
-        self.details = details or {}
+        self.details: Dict[str, Any] = details or {}
 
 
 class DetectionError(SecretFrameworkError):
@@ -91,7 +93,7 @@ class CredentialValidationError(RotationError):
 class RateLimitError(APIError):
     """Raised when API rate limit is exceeded."""
 
-    def __init__(self, message: str, retry_after: int = None):
+    def __init__(self, message: str, retry_after: Optional[int] = None):
         """Initialize rate limit error.
 
         Args:
