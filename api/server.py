@@ -4,7 +4,7 @@ import os
 import tempfile
 from datetime import datetime
 from pathlib import Path
-from typing import Dict, List, Optional, Any
+from typing import Any, Dict, List, Optional, Union
 
 from fastapi import FastAPI, HTTPException, BackgroundTasks, UploadFile, File
 from fastapi.responses import JSONResponse, FileResponse
@@ -13,6 +13,7 @@ from pydantic_settings import BaseSettings
 
 from scanners import GitScanner, GitHubScanner, CommitHistoryScanner
 from rotators import AWSRotator, AzureRotator, GitHubRotator
+from logging_config import get_logger
 from detectors import SecretFinding
 from reporting.reporter import Reporter
 
@@ -112,6 +113,7 @@ app = FastAPI(
 
 # Load settings
 settings = Settings()
+logger = get_logger(__name__)
 
 # Global state for background tasks
 scan_jobs: Dict[str, Dict] = {}
@@ -512,6 +514,7 @@ async def auto_rotate_secrets(findings: List[SecretFinding]):
     for finding in findings:
         if finding.severity in ["critical", "high"]:
             try:
+                rotator: Union[AWSRotator, AzureRotator, GitHubRotator]
                 # Determine the type of secret and rotate accordingly
                 if "aws" in finding.secret_type.lower():
                     rotator = AWSRotator(region=settings.aws_region)
@@ -537,7 +540,7 @@ async def auto_rotate_secrets(findings: List[SecretFinding]):
                         # success, details = rotator.revoke_personal_access_token(...)
 
             except Exception as e:
-                print(f"Auto-rotation failed for {finding.secret_type}: {e}")
+                logger.error("Auto-rotation failed for %s: %s", finding.secret_type, e)
 
     return rotation_results
 

@@ -2,7 +2,7 @@
 
 import re
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any, List, Optional
 from uuid import UUID
 
 from exceptions import ValidationError
@@ -313,7 +313,7 @@ def sanitize_string(value: str, max_length: int = 1000) -> str:
     return sanitized
 
 
-def validate_dict(value: Any, required_keys: list = None) -> dict:
+def validate_dict(value: Any, required_keys: Optional[List[str]] = None) -> dict:
     """Validate dictionary and required keys.
 
     Args:

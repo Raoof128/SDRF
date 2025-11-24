@@ -57,7 +57,7 @@ def temp_repo() -> Generator[Path, None, None]:
 
 
 @pytest.fixture
-def repo_with_secrets(temp_repo, sample_secrets) -> Path:
+def repo_with_secrets(temp_repo: Path, sample_secrets: dict) -> Path:
     """Create a repository with sample secrets.
 
     Args:

@@ -157,7 +157,7 @@ class AzureRotator:
             result["new_secret"] = new_secret[:4] + "..." + new_secret[-4:]  # Masked
 
             self.rotation_history.append(result)
-            print(f"✅ Successfully rotated service principal secret")
+            print("✅ Successfully rotated service principal secret")
             return True, result
 
         except Exception as e:
@@ -256,7 +256,7 @@ class AzureRotator:
             result["message"] = f"Successfully rotated {key_name} for {account_name}"
 
             self.rotation_history.append(result)
-            print(f"✅ Successfully rotated storage account key")
+            print("✅ Successfully rotated storage account key")
             return True, result
 
         except Exception as e:
@@ -318,7 +318,7 @@ class AzureRotator:
             result["message"] = f"Successfully rotated {key_kind} key for {account_name}"
 
             self.rotation_history.append(result)
-            print(f"✅ Successfully rotated Cosmos DB key")
+            print("✅ Successfully rotated Cosmos DB key")
             return True, result
 
         except Exception as e:

@@ -3,7 +3,7 @@
 import json
 import os
 from pathlib import Path
-from typing import Any, Dict, Optional
+from typing import Any, Dict, Optional, Union
 
 import yaml
 
@@ -16,7 +16,11 @@ logger = get_logger(__name__)
 class ConfigManager:
     """Manage framework configuration."""
 
-    def __init__(self, patterns_file: Optional[str] = None, policies_file: Optional[str] = None):
+    def __init__(
+        self,
+        patterns_file: Optional[Union[str, Path]] = None,
+        policies_file: Optional[Union[str, Path]] = None,
+    ):
         """Initialize configuration manager.
 
         Args:

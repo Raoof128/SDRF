@@ -291,7 +291,7 @@ class AWSRotator:
             result["message"] = f"Successfully rotated RDS password for {db_instance_identifier}"
 
             self.rotation_history.append(result)
-            print(f"✅ Successfully rotated RDS password")
+            print("✅ Successfully rotated RDS password")
             return True, result
 
         except ClientError as e:

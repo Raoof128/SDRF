@@ -154,8 +154,9 @@ class StringUtils:
         # Remove invalid characters
         sanitized = re.sub(r'[<>:"/\\|?*]', "_", filename)
 
-        # Remove leading/trailing spaces and dots
+        # Remove leading/trailing spaces and dots and collapse traversal markers
         sanitized = sanitized.strip(". ")
+        sanitized = sanitized.lstrip("._")
 
         # Limit length
         if len(sanitized) > 255:
@@ -299,7 +300,7 @@ class DateTimeUtils:
         # Try ISO format
         try:
             return datetime.fromisoformat(timestamp.replace("Z", "+00:00"))
-        except:
+        except ValueError:
             pass
 
         # Try common formats
@@ -312,7 +313,7 @@ class DateTimeUtils:
         for fmt in formats:
             try:
                 return datetime.strptime(timestamp, fmt)
-            except:
+            except ValueError:
                 continue
 
         raise ValueError(f"Cannot parse timestamp: {timestamp}")
