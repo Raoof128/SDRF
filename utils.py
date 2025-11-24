@@ -6,11 +6,13 @@ import os
 import re
 from datetime import datetime, timedelta
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple, Union
+from typing import Any, Callable, Dict, List, Optional, Tuple, TypeVar, Union
 
 from logging_config import get_logger
 
 logger = get_logger(__name__)
+
+T = TypeVar("T")
 
 
 class ValidationError(Exception):
@@ -408,40 +410,50 @@ class RetryHelper:
 
     @staticmethod
     def retry_with_backoff(
-        func,
+        func: Callable[..., T],
+        *args: Any,
         max_attempts: int = 3,
         initial_delay: float = 1.0,
         backoff_factor: float = 2.0,
-        exceptions: tuple = (Exception,),
-    ):
-        """Retry function with exponential backoff.
+        exceptions: tuple[type[BaseException], ...] = (Exception,),
+        sleep_fn: Optional[Callable[[float], None]] = None,
+    ) -> T:
+        """Retry a callable using exponential backoff.
 
         Args:
-            func: Function to retry
-            max_attempts: Maximum number of attempts
-            initial_delay: Initial delay in seconds
-            backoff_factor: Backoff multiplier
-            exceptions: Tuple of exceptions to catch
+            func: Function to retry.
+            *args: Positional arguments for ``func``.
+            max_attempts: Maximum number of attempts before failing.
+            initial_delay: Initial delay between attempts in seconds.
+            backoff_factor: Multiplier applied to the delay after each attempt.
+            exceptions: Exception types that should trigger a retry.
+            sleep_fn: Optional sleep function for tests; defaults to ``time.sleep``.
 
         Returns:
-            Function result
+            The result of ``func`` once it succeeds.
 
         Raises:
-            Last exception if all attempts fail
+            The last captured exception if all attempts fail.
         """
         import time
 
         delay = initial_delay
         last_exception: Optional[BaseException] = None
+        sleeper = sleep_fn or time.sleep
 
         for attempt in range(max_attempts):
             try:
-                return func()
-            except exceptions as e:
-                last_exception = e
+                return func(*args)
+            except exceptions as exc:
+                last_exception = exc
                 if attempt < max_attempts - 1:
-                    logger.warning(f"Attempt {attempt + 1} failed: {e}. Retrying in {delay}s...")
-                    time.sleep(delay)
+                    logger.warning(
+                        "Attempt %s failed with %s. Retrying in %.2fs...",
+                        attempt + 1,
+                        exc,
+                        delay,
+                    )
+                    sleeper(delay)
                     delay *= backoff_factor
 
         if last_exception is not None:
