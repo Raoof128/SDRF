@@ -1,7 +1,4 @@
-"""Custom exceptions for Secret Detection & Rotation Framework."""
-
-
-"""Custom exception hierarchy for the framework."""
+"""Custom exception hierarchy for the Secret Detection & Rotation Framework."""
 
 from typing import Any, Dict, Optional
 
