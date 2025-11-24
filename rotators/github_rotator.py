@@ -84,21 +84,21 @@ class GitHubRotator:
 
                 result["user"] = user.login
                 result["status"] = "partial"
-                result[
-                    "message"
-                ] = "Token marked for revocation. Manual removal recommended via GitHub Settings."
+                result["message"] = (
+                    "Token marked for revocation. Manual removal recommended via GitHub Settings."
+                )
             else:
                 # Without token ID, best we can do is invalidate it in our systems
                 result["status"] = "partial"
-                result[
-                    "message"
-                ] = "Token cannot be directly revoked via API. Remove manually from GitHub Settings > Personal Access Tokens."
+                result["message"] = (
+                    "Token cannot be directly revoked via API. Remove manually from GitHub Settings > Personal Access Tokens."
+                )
 
             # Add to blacklist or internal tracking
             self._add_to_blacklist(token_to_revoke)
 
             self.rotation_history.append(result)
-            print(f"⚠️ Token revocation initiated. Manual removal recommended.")
+            print("⚠️ Token revocation initiated. Manual removal recommended.")
             return True, result
 
         except GithubException as e:
@@ -173,14 +173,14 @@ class GitHubRotator:
                 result["repository_selection"] = token_data.get("repository_selection", "all")
 
                 result["status"] = "success"
-                result["message"] = f"Successfully created new installation token"
+                result["message"] = "Successfully created new installation token"
 
                 # Store the new token securely (example using environment variable)
                 # In production, use a secrets management service
                 os.environ[f"GITHUB_APP_TOKEN_{installation_id}"] = token_data["token"]
 
                 self.rotation_history.append(result)
-                print(f"✅ Successfully rotated GitHub App token")
+                print("✅ Successfully rotated GitHub App token")
                 return True, result
             else:
                 raise Exception(f"Failed to create token: {response.status_code} - {response.text}")
@@ -291,7 +291,7 @@ class GitHubRotator:
             result["message"] = f"Successfully rotated deploy key for {repo_name}"
 
             self.rotation_history.append(result)
-            print(f"✅ Successfully rotated deploy key")
+            print("✅ Successfully rotated deploy key")
             return True, result
 
         except Exception as e:
@@ -367,14 +367,14 @@ class GitHubRotator:
             result["webhook_id"] = target_webhook.id
             result["new_secret"] = new_secret[:8] + "..." + new_secret[-8:]  # Masked
             result["status"] = "success"
-            result["message"] = f"Successfully rotated webhook secret"
+            result["message"] = "Successfully rotated webhook secret"
 
             # Store the secret securely
             # In production, use environment variables or secrets management
             os.environ[f"WEBHOOK_SECRET_{repo_name.replace('/', '_')}"] = new_secret
 
             self.rotation_history.append(result)
-            print(f"✅ Successfully rotated webhook secret")
+            print("✅ Successfully rotated webhook secret")
             return True, result
 
         except Exception as e:
@@ -408,7 +408,7 @@ class GitHubRotator:
             self.blacklisted_tokens = set()
 
         self.blacklisted_tokens.add(token)
-        print(f"Added token to blacklist")
+        print("Added token to blacklist")
 
     def validate_token(self, token: str) -> bool:
         """Validate that a GitHub token works.

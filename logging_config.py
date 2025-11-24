@@ -19,9 +19,9 @@ class SecretMaskingFormatter(logging.Formatter):
         (r"(gho_[a-zA-Z0-9]{36})", "[GITHUB_OAUTH_MASKED]"),  # GitHub OAuth
         (
             r"([a-zA-Z0-9_-]{32,})",
-            lambda m: m.group(1)[:4] + "..." + m.group(1)[-4:]
-            if len(m.group(1)) > 20
-            else m.group(1),
+            lambda m: (
+                m.group(1)[:4] + "..." + m.group(1)[-4:] if len(m.group(1)) > 20 else m.group(1)
+            ),
         ),
     ]
 
@@ -170,7 +170,7 @@ def log_detection(secret_type: str, file_path: str, severity: str, **kwargs):
         severity: Severity level
         **kwargs: Additional context
     """
-    log_audit(f"SECRET_DETECTED", type=secret_type, file=file_path, severity=severity, **kwargs)
+    log_audit("SECRET_DETECTED", type=secret_type, file=file_path, severity=severity, **kwargs)
 
 
 def log_rotation(provider: str, status: str, **kwargs):
@@ -182,7 +182,7 @@ def log_rotation(provider: str, status: str, **kwargs):
         **kwargs: Additional context
     """
     log_audit(
-        f"CREDENTIAL_ROTATION",
+        "CREDENTIAL_ROTATION",
         provider=provider,
         status=status,
         timestamp=datetime.utcnow().isoformat(),
@@ -199,7 +199,7 @@ def log_scan(scan_type: str, target: str, findings: int, **kwargs):
         findings: Number of findings
         **kwargs: Additional context
     """
-    log_audit(f"SCAN_COMPLETED", type=scan_type, target=target, findings=findings, **kwargs)
+    log_audit("SCAN_COMPLETED", type=scan_type, target=target, findings=findings, **kwargs)
 
 
 # Initialize default logger

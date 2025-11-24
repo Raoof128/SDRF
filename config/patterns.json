@@ -1,0 +1,59 @@
+{
+  "entropy_threshold": 4.0,
+  "excluded_paths": [
+    ".git/",
+    "node_modules/",
+    "dist/",
+    "build/",
+    "venv/",
+    "__pycache__/"
+  ],
+  "excluded_extensions": [
+    ".png",
+    ".jpg",
+    ".jpeg",
+    ".gif",
+    ".pdf",
+    ".bin",
+    ".exe",
+    ".zip"
+  ],
+  "patterns": {
+    "aws": {
+      "access_key": {
+        "regex": "(?<![A-Z0-9])AKIA[0-9A-Z]{16}(?![A-Z0-9])",
+        "description": "AWS Access Key ID",
+        "severity": "critical",
+        "context": ["AWS_ACCESS_KEY_ID", "aws_access_key_id", "aws_access_key"]
+      },
+      "secret_key": {
+        "regex": "(?<![A-Za-z0-9])[A-Za-z0-9/+=]{40}(?![A-Za-z0-9/+=])",
+        "description": "AWS Secret Access Key",
+        "severity": "critical",
+        "context": ["AWS_SECRET_ACCESS_KEY", "aws_secret_access_key", "aws_secret"]
+      }
+    },
+    "github": {
+      "personal_access_token": {
+        "regex": "(?<![A-Za-z0-9])ghp_[A-Za-z0-9]{36}(?![A-Za-z0-9])",
+        "description": "GitHub Personal Access Token",
+        "severity": "high",
+        "context": ["GITHUB_TOKEN", "github_token", "github_pat"]
+      }
+    },
+    "generic": {
+      "jwt": {
+        "regex": "eyJ[a-zA-Z0-9_-]+\\.[a-zA-Z0-9._-]+\\.[a-zA-Z0-9._-]+",
+        "description": "JSON Web Token",
+        "severity": "medium",
+        "context": ["jwt", "token", "authorization"]
+      },
+      "api_key": {
+        "regex": "(?<![A-Za-z0-9])[A-Za-z0-9]{32}(?![A-Za-z0-9])",
+        "description": "Generic API key",
+        "severity": "medium",
+        "context": ["api_key", "api-key", "apikey"]
+      }
+    }
+  }
+}
